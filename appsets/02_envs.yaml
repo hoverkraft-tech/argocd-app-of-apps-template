@@ -48,7 +48,7 @@ spec:
           selfHeal: true
       sources:
         # NOTE: please change the organization name here
-        - repoURL: git@github.com:mon-orga/argocd-app-of-apps.git
+        - repoURL: git@github.com:<your-org>/argocd-app-of-apps.git
           path: "{{env}}"
           targetRevision: HEAD
           directory:
