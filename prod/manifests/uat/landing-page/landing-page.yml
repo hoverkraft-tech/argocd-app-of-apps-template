@@ -6,5 +6,3 @@ metadata:
     app.kubernetes.io/instance: landing-page-uat
     argocd.argoproj.io/sync-options: Prune=true
     argocd.argoproj.io/sync-wave: "0"
-    # TODO: set clusterid once ready
-    # field.cattle.io/projectId: c-78cf4:p-dpg5r
