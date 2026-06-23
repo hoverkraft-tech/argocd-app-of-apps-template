@@ -1,0 +1,64 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: __APP_NAME__-uat
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/application-repository: __APP_NAME__
+    argocd.argoproj.io/deployment-id: "" # Will be updated by deploy workflow
+    argocd.argoproj.io/environment: "uat"
+    argocd.argoproj.io/sync-wave: "1"
+    notifications.argoproj.io/subscribe.on-sync-operation-change.slack: applications
+    notifications.argoproj.io/subscribe.on-sync-operation-change.github-dispatch: ""
+  labels:
+    layer: applications
+    service: __APP_NAME__
+    environment: uat
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  destination:
+    namespace: __APP_NAME__-uat
+    server: <url-cluster-prod>
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=false
+      - ServerSideApply=true
+      - SkipDryRunOnMissingResource=true
+    automated:
+      prune: true
+      selfHeal: true
+  sources:
+    - repoURL: ghcr.io/<your-org>/__APP_NAME__/charts/application
+      targetRevision: "" # Will be updated by deploy workflow
+      chart: __APP_NAME__
+      plugin:
+        name: hoverkraft-deployment
+        env:
+          # set the following to "1" if this is an argocd multi-sources application
+          - name: ARGOCD_MULTI_SOURCES
+            value: "1"
+          - name: HOVERKRAFT_DEPLOYMENT_ID
+            value: "" # Will be updated by deploy workflow
+    - repoURL: ghcr.io/<your-org>/__APP_NAME__/charts/application
+      targetRevision: "" # Will be updated by deploy workflow
+      chart: __APP_NAME__
+      helm:
+        values: |
+          ingress:
+            enabled: true
+            className: "traefik"
+            annotations:
+              cert-manager.io/cluster-issuer: letsencrypt
+            hosts:
+              - host: __APP_NAME__-uat.<your-domain>
+                paths:
+                  - path: /
+                    pathType: ImplementationSpecific
+            tls:
+              - secretName: __APP_NAME__-tls
+                hosts:
+                  - __APP_NAME__-uat.<your-domain>
+          deploymentId: "" # Will be updated by deploy workflow

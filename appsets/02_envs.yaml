@@ -1,6 +1,6 @@
-# spefiifics manifests (both argocd apps and raw manifests) that will be applied cluster by cluster
-# each targeted cluster should have a coresponding folder at the root of the repo
-# check `./tools` or `./dev` dirctories for example
+# specifics manifests (both argocd apps and raw manifests) that will be applied cluster by cluster
+# each targeted cluster should have a corresponding folder at the root of the repo
+# check `./tools` or `./dev` directories for example
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
@@ -47,8 +47,8 @@ spec:
           allowEmpty: true
           selfHeal: true
       sources:
-        # NOTE: please change the organization name here
-        - repoURL: git@github.com:<your-org>/argocd-app-of-apps.git
+        # NOTE: please change the organization and repository name here
+        - repoURL: git@github.com:<your-org>/<your-repo>.git
           path: "{{env}}"
           targetRevision: HEAD
           directory:

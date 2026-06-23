@@ -17,7 +17,7 @@ spec:
   destination:
     # NOTE: this is just a placeholder, the real namespace must be set in each manifest
     namespace: default
-    server: <url cluster dev>
+    server: <url-cluster-dev>
   syncPolicy:
     syncOptions:
       - CreateNamespace=true
@@ -30,5 +30,5 @@ spec:
     directory:
       recurse: true
     path: dev/manifests
-    repoURL: git@github.com:<your-org>/argocd-app-of-apps.git
+    repoURL: git@github.com:<your-org>/<your-repo>.git
     targetRevision: HEAD

@@ -32,5 +32,5 @@ spec:
     directory:
       recurse: true
     path: prod/apps
-    repoURL: git@github.com:<your-org>/argocd-app-of-apps.git
+    repoURL: git@github.com:<your-org>/<your-repo>.git
     targetRevision: HEAD
