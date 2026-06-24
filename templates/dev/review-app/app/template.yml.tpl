@@ -7,13 +7,11 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "1"
     argocd.argoproj.io/application-repository: __APP_NAME__
-    argocd.argoproj.io/deployment-id: ""
     argocd.argoproj.io/environment: "review"
-    notifications.argoproj.io/subscribe.on-sync-operation-change.slack: applications
-    notifications.argoproj.io/subscribe.on-sync-operation-change.github-dispatch: ""
   labels:
     layer: applications
     service: __APP_NAME__
+    component: main
     environment: dev
   finalizers:
     - resources-finalizer.argocd.argoproj.io
@@ -31,17 +29,6 @@ spec:
       prune: true
       selfHeal: true
   sources:
-    - repoURL: ghcr.io/<your-org>/__APP_NAME__/charts/application
-      targetRevision: "" # Will be updated by deploy workflow
-      chart: __APP_NAME__
-      plugin:
-        name: hoverkraft-deployment
-        env:
-          # set the following to "1" if this is an argocd multi-sources application
-          - name: ARGOCD_MULTI_SOURCES
-            value: "1"
-          - name: HOVERKRAFT_DEPLOYMENT_ID
-            value: "" # Will be updated by deploy workflow
     - repoURL: ghcr.io/<your-org>/__APP_NAME__/charts/application
       targetRevision: "" # Will be updated by deploy workflow
       chart: __APP_NAME__

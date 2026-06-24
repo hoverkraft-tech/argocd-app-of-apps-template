@@ -6,14 +6,12 @@ metadata:
   namespace: argocd
   annotations:
     argocd.argoproj.io/application-repository: __APP_NAME__
-    argocd.argoproj.io/deployment-id: "" # Will be updated by deploy workflow
     argocd.argoproj.io/environment: "production"
     argocd.argoproj.io/sync-wave: "1"
-    notifications.argoproj.io/subscribe.on-sync-operation-change.slack: applications
-    notifications.argoproj.io/subscribe.on-sync-operation-change.github-dispatch: ""
   labels:
     layer: applications
     service: __APP_NAME__
+    component: main
     environment: prod
   finalizers:
     - resources-finalizer.argocd.argoproj.io
@@ -34,17 +32,6 @@ spec:
     - repoURL: ghcr.io/<your-org>/__APP_NAME__/charts/application
       targetRevision: "" # Will be updated by deploy workflow
       chart: __APP_NAME__
-      plugin:
-        name: hoverkraft-deployment
-        env:
-          # set the following to "1" if this is an argocd multi-sources application
-          - name: ARGOCD_MULTI_SOURCES
-            value: "1"
-          - name: HOVERKRAFT_DEPLOYMENT_ID
-            value: "" # Will be updated by deploy workflow
-    - repoURL: ghcr.io/<your-org>/__APP_NAME__/charts/application
-      targetRevision: "" # Will be updated by deploy workflow
-      chart: __APP_NAME__
       helm:
         values: |
           ingress:
@@ -61,4 +48,3 @@ spec:
               - secretName: __APP_NAME__-tls
                 hosts:
                   - __APP_NAME__.<your-domain> # Will be updated by deploy workflow
-          deploymentId: "" # Will be updated by deploy workflow
