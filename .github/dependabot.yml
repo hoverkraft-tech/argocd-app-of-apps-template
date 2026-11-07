@@ -1,6 +1,9 @@
 version: 2
 updates:
   - package-ecosystem: github-actions
+    commit-message:
+      prefix: build
+      include: scope
     open-pull-requests-limit: 20
     directory: "/"
     cooldown:
