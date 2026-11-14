@@ -99,10 +99,12 @@ remove_marked_block() {
 cleanup_initialization_artifacts() {
 	remove_marked_block "$repo_root/Makefile" '# template-init:start' '# template-init:end'
 	remove_marked_block "$repo_root/README.md" '<!-- template-init:start -->' '<!-- template-init:end -->'
+	remove_marked_block "$repo_root/.github/workflows/release.yml" '          # template-init:start' '          # template-init:end'
 }
 
 list_pending_files() {
 	printf '%s\n' "$repo_root/Makefile"
+	printf '%s\n' "$repo_root/.github/workflows/release.yml"
 	find "$repo_root/README.md" \
 		"$repo_root/appsets" \
 		"$repo_root/dev" \
