@@ -89,7 +89,7 @@ Optional arguments:
 - `REPO_NAME=my-argocd-repo` if the repository name should not default to the current directory name
 - `DRY_RUN=1` to preview the files that would be updated
 
-The bootstrap replaces repository-level placeholders such as `<your-org>`, `<your-repo>`, `<your-domain>`, `<url-cluster-dev>`, and `<url-cluster-prod>`, then deletes `scripts/init_repo.sh` so the setup step cannot be rerun accidentally.
+The bootstrap replaces repository-level placeholders such as `<your-org>`, `<your-repo>`, `<your-domain>`, `<url-cluster-dev>`, and `<url-cluster-prod>`. It removes HoverKraft's OpenAI release-summary configuration, keeping GitHub releases available without an OpenAI secret, then deletes `scripts/init_repo.sh` so the setup step cannot be rerun accidentally.
 
 <!-- template-init:end -->
 
@@ -162,3 +162,5 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for contribution guidelines.
 ## License
 
 This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
+
+See the [development documentation](docs/README.md) for local checks.

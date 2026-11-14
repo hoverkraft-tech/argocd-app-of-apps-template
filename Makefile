@@ -1,14 +1,16 @@
-.PHONY: help new-app lint lint-fix
+LINTER_IMAGE ?= argocd-app-of-apps-template-linter:local
+FILTER ?= $(or $(filter-out lint lint-fix,$(MAKECMDGOALS)),.*)
+
+.DEFAULT_GOAL := help
+.PHONY: help lint lint-fix
+
+help: ## Display available commands
+	@awk 'BEGIN {FS = ":.*## "} /^[a-zA-Z_-]+:.*## / {printf "%-18s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
 # template-init:start
 .PHONY: init-repo
 # template-init:end
-
-MAKEFLAGS += --silent
-.DEFAULT_GOAL := help
-
-help: ## Show help message
-	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m\033[0m\n"} /^[$$()% a-zA-Z_-]+:.*?##/ { printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
+.PHONY: new-app
 
 # template-init:start
 init-repo: ## Initialize a repository created from this template (usage: make init-repo GITHUB_ORG=my-org BASE_DOMAIN=example.com DEV_CLUSTER_URL=https://dev.example.com PROD_CLUSTER_URL=https://prod.example.com [REPO_NAME=my-repo] [DRY_RUN=1])
@@ -55,49 +57,38 @@ new-app: ## Scaffold a new app across dev, UAT, and production (usage: make new-
 		--new-app "$(APP_NAME)" \
 		$(if $(DRY_RUN),--dry-run,)
 
-lint: ## Execute linting
+lint: ## Run the repository lint checks (optional FILTER=regex)
 	$(call run_linter,)
 
-lint-fix: ## Execute linting and fix
+lint-fix: ## Apply supported automatic lint fixes (optional FILTER=regex)
 	$(call run_linter, \
-		-e FIX_SPELL_CODESPELL=true \
+		-e FIX_BIOME_LINT=true \
+		-e FIX_BIOME_FORMAT=true \
 		-e FIX_MARKDOWN=true \
 		-e FIX_MARKDOWN_PRETTIER=true \
 		-e FIX_YAML_PRETTIER=true \
 		-e FIX_NATURAL_LANGUAGE=true \
 		-e FIX_SHELL_SHFMT=true \
-		-e FIX_BIOME_LINT=true \
-		-e FIX_BIOME_FORMAT=true \
+		-e FIX_SPELL_CODESPELL=true \
 	)
 
 define run_linter
-	DEFAULT_WORKSPACE="$(CURDIR)"; \
-	LINTER_IMAGE="linter:latest"; \
-	VOLUME="$$DEFAULT_WORKSPACE:$$DEFAULT_WORKSPACE"; \
-	docker build --platform linux/amd64 --build-arg UID=$(shell id -u) --build-arg GID=$(shell id -g) --tag $$LINTER_IMAGE .; \
-	docker run \
-		--platform linux/amd64 \
-		-v $$VOLUME \
-		--rm \
-		-e DEFAULT_WORKSPACE="$$DEFAULT_WORKSPACE" \
-		-e FILTER_REGEX_INCLUDE="$(filter-out $@,$(MAKECMDGOALS))" \
+	@set -eu; \
+	git_common_dir="$$(git rev-parse --path-format=absolute --git-common-dir)"; \
+	docker build --platform linux/amd64 --target linter \
+		--build-arg UID="$$(id -u)" --build-arg GID="$$(id -g)" \
+		--tag "$(LINTER_IMAGE)" .; \
+	docker run --platform linux/amd64 --rm \
+		--volume "$(CURDIR):$(CURDIR)" \
+		--volume "$$git_common_dir:$$git_common_dir:ro" \
+		-e DEFAULT_WORKSPACE="$(CURDIR)" \
+		-e FILTER_REGEX_INCLUDE="$(FILTER)" \
 		$(1) \
-		$$LINTER_IMAGE
+		"$(LINTER_IMAGE)"
 endef
 
-define docker-compose
-    COMPOSE_DOCKER_CLI_BUILD=1 DOCKER_BUILDKIT=1 docker-compose -f docker-compose.yml -f docker-compose.local.yml -f docker-compose.$(1).yml $(2)
-endef
-
-define open-in-browser
-	@if command -v x-www-browser &> /dev/null ; then x-www-browser $(1); \
-	elif command -v xdg-open &> /dev/null ; then xdg-open $(1); \
-	elif command -v open &> /dev/null ; then open $(1); \
-	elif command -v start &> /dev/null ; then	start $(1);	fi;
-endef
-
-#############################
-# Argument fix workaround
-#############################
+# Allow the shared "make lint <pattern>" interface without hiding other target typos.
+ifneq ($(filter lint lint-fix,$(MAKECMDGOALS)),)
 %:
 	@:
+endif
